@@ -1,0 +1,82 @@
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+        <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+        <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    </head>
+
+    <body>
+        <nav class="navbar navbar-inverse" role="navigation">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="index.html">病人管理</a>
+                </div>
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="medicines.html">药品管理</a>
+                </div>
+            </div>
+        </nav>
+
+        <h1>药品存量</h1>
+
+        <div id="vm_medicines">
+            <input v-model="filter_name" class="form-control" placeholder="筛选药品：">
+
+            <hr/>
+
+            <div class="form" role="form">
+                <div v-for="medicine in filter(medicines, filter_name)" :key="medicine.name" class="form-group">
+                    <label>{{ medicine.name }}</label>
+                    <button class="btn btn-default" v-on:click="medicine.count -= medicine.count > 10 ? 10 : medicine.count; persist()">-10</button>
+                    <button class="btn btn-default" v-on:click="medicine.count -= medicine.count > 0 ? 1 : 0; persist()">-</button>
+                    {{ medicine.count }}
+                    <button class="btn btn-default" v-on:click="medicine.count += 1; persist()">+</button>
+                    <button class="btn btn-default" v-on:click="medicine.count += 10; persist()">+10</button>
+                </div>
+            </div>
+            <div class="form-inline">
+                <div class="form-group">
+                    <input class="form-control" v-model="new_medicine_name"></input>
+                    <button class="btn btn-default" v-on:click="add_medicine(); persist()">添加新药</button>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <script>
+     fs = require('fs')
+     function read_file(path) {
+         return fs.readFileSync(path, 'utf8');
+     }
+     function write_file(path, output) {
+         fs.writeFileSync(path, output);
+     }
+
+     medicines = JSON.parse(read_file('medicines.json'))
+
+     var vm_medicines = new Vue({
+         el: "#vm_medicines",
+         data: {
+             medicines: medicines,
+             filter_name: "",
+             add_medicine: function() {
+                 this.medicines.push(
+                     {name: this.new_medicine_name, count: 0}
+                 )
+             },
+             filter: function(medicines, filter_name) {
+                 return medicines.filter(medicine => medicine.name.includes(filter_name))
+             },
+             new_medicine_name: "",
+             persist: function() {
+                 write_file('medicines.json', JSON.stringify(medicines))
+             }
+
+         }
+     })
+
+    </script>
+
+</html>
