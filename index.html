@@ -247,7 +247,11 @@
          fs.writeFileSync(path, output);
      }
 
-     patients = JSON.parse(read_file('patients.json'))
+     try {
+         patients = JSON.parse(read_file('patients.json'))
+     } catch(e) {
+         patients = [];
+     }
 
      function Patient(name) {
          this.name = name

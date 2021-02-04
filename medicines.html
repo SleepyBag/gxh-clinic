@@ -54,7 +54,11 @@
          fs.writeFileSync(path, output);
      }
 
-     medicines = JSON.parse(read_file('medicines.json'))
+     try {
+         medicines = JSON.parse(read_file('medicines.json'))
+     } catch(e) {
+         medicines = [];
+     }
 
      var vm_medicines = new Vue({
          el: "#vm_medicines",
