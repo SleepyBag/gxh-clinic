@@ -22,20 +22,21 @@
         <h1>药品存量</h1>
 
         <div id="vm_medicines">
-            <input v-model="filter_name" class="form-control" placeholder="筛选药品：">
+            <input v-model="filter_name" class="form-control" placeholder="搜索药品：">
 
             <hr/>
 
-            <div class="form" role="form">
-                <div v-for="medicine in filter(medicines, filter_name)" :key="medicine.name" class="form-group">
-                    <label>{{ medicine.name }}</label>
-                    <button class="btn btn-default" v-on:click="medicine.count -= medicine.count > 10 ? 10 : medicine.count; persist()">-10</button>
-                    <button class="btn btn-default" v-on:click="medicine.count -= medicine.count > 0 ? 1 : 0; persist()">-</button>
-                    {{ medicine.count }}
-                    <button class="btn btn-default" v-on:click="medicine.count += 1; persist()">+</button>
-                    <button class="btn btn-default" v-on:click="medicine.count += 10; persist()">+10</button>
-                </div>
-            </div>
+            <table class="form" role="form" cellspacing="100">
+                <tr v-for="medicine in filter(medicines, filter_name)" :key="medicine.name" class="form-group">
+                    <td> <label>{{ medicine.name }}：</label> </td>
+                    <td> 剩余 {{ medicine.count }} 个 </td>
+                    <td> <button class="btn btn-default" v-on:click="medicine.count -= medicine.count > 10 ? 10 : medicine.count; persist()"> 减 10 个 </button> </td>
+                    <td> <button class="btn btn-default" v-on:click="medicine.count -= medicine.count > 0 ? 1 : 0; persist()"> 减 1 个 </button> </td>
+                    <td> <button class="btn btn-default" v-on:click="medicine.count += 1; persist()"> 加 1 个 </button> </td>
+                    <td> <button class="btn btn-default" v-on:click="medicine.count += 10; persist()"> 加 10 个 </button> </td>
+                    <td> <button class="btn btn-danger" v-on:click="delete_medicine(medicine.name)"> 删除 </button> </td>
+                </tr>
+            </table>
             <div class="form-inline">
                 <div class="form-group">
                     <input class="form-control" v-model="new_medicine_name"></input>
@@ -66,9 +67,29 @@
              medicines: medicines,
              filter_name: "",
              add_medicine: function() {
+                 if (this.new_medicine_name == "") {
+                     alert("药品名字不能为空！")
+                     return 1
+                 }
+                 if (medicines.map(medicine => medicine.name).includes(this.new_medicine_name)) {
+                     alert("药品姓名重复！建议在姓名里加点其他信息（比如药厂？）")
+                     return 1
+                 }
                  this.medicines.push(
                      {name: this.new_medicine_name, count: 0}
                  )
+                 this.new_medicine_name = ""
+             },
+             delete_medicine: function(name) {
+                 if (confirm("确认删除这个药品吗？")) {
+                     index = this.medicines.findIndex(medicine => medicine.name == name)
+                     if (index > -1) {
+                         this.medicines.splice(index, 1)
+                         alert("删除成功！")
+                     } else {
+                         alert("删除失败！")
+                     }
+                 }
              },
              filter: function(medicines, filter_name) {
                  return medicines.filter(medicine => medicine.name.includes(filter_name))
